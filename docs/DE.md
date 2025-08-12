@@ -85,7 +85,7 @@ def classify(
 
 **Structure**:
 ```
-notebooks/code-unza25-csc4792-project_team_N-notebook.ipynb
+notebooks/code-unza25-csc4792-project_team_16-notebook.ipynb
 
 1. Introduction and Problem Statement
 2. Data Loading and Exploration  

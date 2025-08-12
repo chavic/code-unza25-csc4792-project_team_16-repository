@@ -26,13 +26,13 @@ Why it matters: helps Hansard indexing, search, and civic analysis.
 ## 2) Deliverables & naming (strict)
 
 * **Report (PDF, ACM template, ≤4 pages):**
-  `docs-unza25-csc4792-project_team_N-technical_report.pdf`
+  `docs-unza25-csc4792-project_team_16-technical_report.pdf`
 * **GitHub repository:**
-  `code-unza25-csc4792-project_team_N-repository`
+  `code-unza25-csc4792-project_team_16-repository`
 * **Google Colab notebook:**
-  `code-unza25-csc4792-project_team_N-notebook.ipynb`
+  `code-unza25-csc4792-project_team_16-notebook.ipynb`
 * **Slides (PDF):**
-  `talks-unza25-csc4792-project_team_N-presentation_slides.pdf`
+  `talks-unza25-csc4792-project_team_16-presentation_slides.pdf`
 * **Everything follows CRISP-DM**; checkpoints are graded and tracked via Git/Colab activity.
 
 **Marking snapshot:** Project management (Git/Colab activity), dataset quality, implementation/demonstration, presentation, and technical report quality.
@@ -42,7 +42,7 @@ Why it matters: helps Hansard indexing, search, and civic analysis.
 ## 3) Repo structure
 
 ```
-code-unza25-csc4792-project_team_N-repository/
+code-unza25-csc4792-project_team_16-repository/
 ├── README.md
 ├── data/
 │   ├── raw/              # scraped HTML/PDF
@@ -51,7 +51,7 @@ code-unza25-csc4792-project_team_N-repository/
 ├── docs/
 │   └── report_assets/    # figs/tables used in paper
 ├── notebooks/
-│   └── code-unza25-csc4792-project_team_N-notebook.ipynb
+│   └── code-unza25-csc4792-project_team_16-notebook.ipynb
 ├── src/
 │   ├── scrape/           # parliament scraping
 │   ├── parse/            # segmentation & linkage to motion
@@ -63,8 +63,8 @@ code-unza25-csc4792-project_team_N-repository/
 ├── experiments/
 │   └── runs/             # metrics.json, confusion matrices
 ├── reports/
-│   ├── docs-unza25-csc4792-project_team_N-technical_report.pdf
-│   └── talks-unza25-csc4792-project_team_N-presentation_slides.pdf
+│   ├── docs-unza25-csc4792-project_team_16-technical_report.pdf
+│   └── talks-unza25-csc4792-project_team_16-presentation_slides.pdf
 └── pyproject.toml | requirements.txt | Makefile
 ```
 
