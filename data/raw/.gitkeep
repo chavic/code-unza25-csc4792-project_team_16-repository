@@ -1,0 +1,4 @@
+# Raw data directory
+# Store scraped HTML/PDF files here
+# Files in this directory are ignored by git (see .gitignore)
+# but the directory structure is preserved

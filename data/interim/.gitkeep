@@ -1,0 +1,4 @@
+# Interim data directory  
+# Store parsed JSONL utterances and motion data here
+# Files in this directory are ignored by git (see .gitignore)
+# but the directory structure is preserved
