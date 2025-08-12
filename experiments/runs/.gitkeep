@@ -1,0 +1,4 @@
+# Experiment runs directory
+# Store model training results and metrics here
+# Individual run directories are ignored by git (see .gitignore)
+# but the directory structure is preserved

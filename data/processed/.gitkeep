@@ -1,0 +1,4 @@
+# Processed data directory
+# Store train/val/test splits and labeled datasets here
+# Files in this directory are ignored by git (see .gitignore)
+# but the directory structure is preserved
