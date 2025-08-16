@@ -89,6 +89,30 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 - **Privacy**: No personal information beyond public parliamentary records
 - **Accuracy**: False classifications could misrepresent parliamentary discourse
 
+### Extended Ethical Considerations
+
+- **Transparency and Explainability**: Classification decisions should be explainable to users, enabling parliamentary staff and researchers to understand why utterances are classified as relevant or not relevant. The model should provide confidence scores and feature importance to support decision transparency (Westminster Foundation for Democracy, 2024).
+
+- **Political Neutrality and Non-Discrimination**: Ensure the model doesn't discriminate based on speaker identity, political affiliation, or political orientation, as algorithmic bias against political viewpoints can arise in AI systems (Leerssen, 2022). The model should perform consistently across all political parties and individual representatives.
+
+- **Fairness Across Demographics**: Minimize bias and ensure fairness across different speaker demographics, including gender, age, constituency, and years of service to prevent systematic disadvantaging of any group (Inter-Parliamentary Union, 2024).
+
+- **Data Representativeness**: Address potential correlations that may overlap with protected categories or political viewpoints by ensuring training data represents diverse speakers, motion types, and parliamentary contexts to prevent accidental bias (Wikipedia, 2025).
+
+- **Contextual Sensitivity**: Respect the cultural and institutional context of Zambian parliamentary discourse, ensuring the model doesn't impose external definitions of relevance that may not align with local parliamentary traditions and practices.
+
+- **Privacy and Consent**: Maintain appropriate handling of public parliamentary records while respecting speaker attribution and ensuring no personal information beyond publicly available Hansard records is used in the classification system.
+
+- **Accountability and Human Oversight**: Promote human autonomy and decision-making by designing the system as a decision-support tool rather than a replacement for human judgment, with clear protocols for human review of classifications (Westminster Foundation for Democracy, 2024).
+
+- **Impact Assessment**: Monitor for unintended consequences such as potential chilling effects on parliamentary speech or systematic misrepresentation of certain speakers' contributions to debates.
+
+**References:**
+- Inter-Parliamentary Union. (2024). Ethical principles: Fairness and non-discrimination. AI Guidelines for Parliaments.
+- Leerssen, P. (2022). Algorithmic Political Bias in Artificial Intelligence Systems. Philosophy & Technology, 35(2).
+- Westminster Foundation for Democracy. (2024). AI guidelines for parliaments.
+- Wikipedia. (2025). Algorithmic bias.
+
 ## Success Criteria
 
 The project will be considered successful if:
