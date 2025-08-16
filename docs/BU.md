@@ -8,6 +8,7 @@
 
 - Francis Kalunga, 2021518884, francis.kalunga@cs.unza.zm
 - Victor Chabunda, 2021422496, victor.chabunda@cs.unza.zm
+- Constance Chilamo, 2021517420, chilamo.constance@cs.unza.zm
 
 ## Problem Statement
 
@@ -21,6 +22,19 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 
 - **Relevant**: utterances that argue for/against the motion, provide supporting evidence, propose amendments, or discuss implementation
 - **NotRelevant**: procedural points, greetings, tangential discussions, jokes, or administrative matters
+
+## Business Objectives
+
+The primary business objectives of this project are:
+
+1. **Improve Accessibility of Parliamentary Records**  
+   Enable parliamentary staff to automatically classify utterances as relevant or not, making it easier to index, search, and retrieve key information.
+2. **Support Evidence-Based Research and Journalism**  
+   Provide researchers and journalists with structured data on parliamentary debates, improving analysis of policy discussions and representative accountability.
+3. **Enhance Transparency and Civic Engagement**  
+   Allow citizens and civic organizations to more easily understand how their representatives engage with motions, fostering accountability and democratic participation.
+4. **Increase Operational Efficiency**  
+   Reduce the time and effort required for manual annotation and indexing of Hansard records by introducing automation.
 
 ## Intended Users
 
