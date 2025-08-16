@@ -4,6 +4,10 @@
 **Date:** 2025  
 **Team:** Team 16  
 
+## Team Members
+
+- Francis Kalunga, 2021518884
+
 ## Problem Statement
 
 The Zambian National Assembly generates extensive debate transcripts during parliamentary sittings, but currently lacks an automated system to identify which speaker utterances are directly relevant to the motions being discussed. This creates challenges for:
