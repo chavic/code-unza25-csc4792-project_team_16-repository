@@ -13,6 +13,7 @@ The Zambian National Assembly generates extensive debate transcripts during parl
 - **Citizens** who seek to understand how their representatives engage with specific policy issues
 
 The problem is to **classify each speaker turn in parliamentary debates as either "Relevant" or "NotRelevant" to the motion under discussion**, where:
+
 - **Relevant**: utterances that argue for/against the motion, provide supporting evidence, propose amendments, or discuss implementation
 - **NotRelevant**: procedural points, greetings, tangential discussions, jokes, or administrative matters
 
@@ -26,11 +27,13 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 ## Key Performance Indicators (KPIs)
 
 ### Primary Metrics
+
 - **Macro-F1 Score** ≥ 0.75 (balanced performance across both classes)
 - **Relevant Class Recall** ≥ 0.80 (capture most relevant utterances)
 - **Area Under Precision-Recall Curve (AUPRC)** ≥ 0.70 (handle class imbalance)
 
 ### Secondary Metrics
+
 - Balanced Accuracy ≥ 0.75
 - Per-sitting performance consistency
 - Per-speaker performance analysis
@@ -38,18 +41,21 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 ## Scope and Constraints
 
 ### In Scope
+
 - Parliamentary debates and proceedings from Zambian National Assembly
 - English language utterances
 - Motions from Order Papers (substantive motions, not procedural)
 - Speaker turns with clear attribution and timestamps
 
 ### Out of Scope
+
 - Committee proceedings (different format and context)
 - Question Time sessions (different interaction patterns)
 - Languages other than English
 - Real-time classification (batch processing acceptable)
 
 ### Data Coverage
+
 - Target: 6-10 parliamentary sittings from 2023
 - Minimum: 1,000 manually labeled utterances for training
 - Time range: Representative sample across different motion types
@@ -57,17 +63,20 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 ## Risks and Assumptions
 
 ### Technical Risks
+
 - **Low inter-annotator agreement** - Complex cases may be subjectively labeled
 - **Class imbalance** - Most utterances may be relevant, creating skewed training data
 - **Context dependency** - Relevance may require understanding previous utterances
 - **Motion complexity** - Compound motions may have multiple relevant topics
 
 ### Business Risks
+
 - **Annotation quality** - Inconsistent labeling could hurt model performance
 - **Generalizability** - Model may not work well on different parliamentary systems
 - **Deployment complexity** - Integration with existing parliamentary systems
 
 ### Key Assumptions
+
 - Parliamentary transcripts are accurately transcribed with speaker attribution
 - Order Papers correctly identify the motions being debated
 - Manual annotation can achieve reasonable consistency (κ ≥ 0.75)
@@ -83,6 +92,7 @@ The problem is to **classify each speaker turn in parliamentary debates as eithe
 ## Success Criteria
 
 The project will be considered successful if:
+
 1. Achieves target KPI thresholds on held-out test data
 2. Demonstrates consistent performance across different sittings and speakers
 3. Provides interpretable predictions with confidence scores
