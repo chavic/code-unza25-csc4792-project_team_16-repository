@@ -1,7 +1,7 @@
 # Deployment (DE)
 
 **Phase:** [DE] Deployment  
-**Date:** 2024  
+**Date:** 2025  
 **Team:** Team 16  
 
 ## Overview

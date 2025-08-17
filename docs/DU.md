@@ -1,7 +1,7 @@
 # Data Understanding (DU)
 
 **Phase:** [DU] Data Understanding  
-**Date:** 2024  
+**Date:** 2025  
 **Team:** Team 16  
 
 ## Data Collection Overview
@@ -11,6 +11,7 @@ This phase focuses on gathering and understanding the raw data needed for the pa
 ## Data Sources
 
 ### 1. Parliamentary Sitting Transcripts
+
 - **Source**: Zambian National Assembly website
 - **Format**: HTML pages with structured debate content
 - **Target**: 6-10 sittings from 2023
@@ -18,6 +19,7 @@ This phase focuses on gathering and understanding the raw data needed for the pa
 - **Storage**: `data/raw/*.html`
 
 ### 2. Order Papers
+
 - **Source**: Corresponding Order Papers for each sitting date
 - **Format**: PDF or HTML documents
 - **Content**: Motion text, motion IDs, motion movers
@@ -27,6 +29,7 @@ This phase focuses on gathering and understanding the raw data needed for the pa
 ## Data Collection Process
 
 ### Scraping Workflow
+
 1. **Identify sitting dates** - Select representative sample from 2023
 2. **Download transcripts** - Scrape HTML content with speaker turns
 3. **Fetch Order Papers** - Download corresponding motion documents
@@ -34,6 +37,7 @@ This phase focuses on gathering and understanding the raw data needed for the pa
 5. **Quality checks** - Verify data completeness and format
 
 ### Technical Implementation
+
 ```bash
 # Scrape parliamentary sittings
 python -m src.scrape.fetch_sittings --out data/raw/
@@ -45,6 +49,7 @@ python -m src.scrape.fetch_order_papers --range 2023-01:2023-12 --out data/inter
 ## Exploratory Data Analysis (EDA)
 
 ### Key Questions to Answer
+
 1. How many utterances per sitting on average?
 2. What is the distribution of utterance lengths?
 3. How many unique speakers participate?
@@ -52,12 +57,14 @@ python -m src.scrape.fetch_order_papers --range 2023-01:2023-12 --out data/inter
 5. What is the preliminary class distribution (relevant vs not relevant)?
 
 ### Expected Findings
+
 - **Utterance length**: Expect wide variation from short procedural statements to long policy arguments
 - **Speaker participation**: Some speakers likely much more active than others
 - **Motion types**: Mix of economic, social, and procedural motions
 - **Class imbalance**: Likely more relevant than not relevant utterances
 
 ### EDA Notebook Structure
+
 The analysis will be documented in `notebooks/du_eda.ipynb` covering:
 
 1. **Data Loading and Basic Stats**
@@ -70,7 +77,7 @@ The analysis will be documented in `notebooks/du_eda.ipynb` covering:
    - Most common words and phrases
    - Speaker vocabulary diversity
 
-3. **Motion Analysis** 
+3. **Motion Analysis**
    - Motion types and categories
    - Motion text length and complexity
    - Temporal patterns
@@ -83,12 +90,14 @@ The analysis will be documented in `notebooks/du_eda.ipynb` covering:
 ## Data Quality Considerations
 
 ### Potential Issues
+
 - **Incomplete transcripts** - Some utterances may be truncated
 - **Speaker misattribution** - Names might be inconsistent
 - **Timestamp accuracy** - May be approximate rather than precise
 - **Motion linkage** - Order Papers may not perfectly align with debate content
 
 ### Quality Metrics
+
 - Percentage of utterances with clear speaker attribution
 - Percentage of sittings with corresponding Order Papers
 - Average utterance completeness (no truncation markers)
@@ -97,6 +106,7 @@ The analysis will be documented in `notebooks/du_eda.ipynb` covering:
 ## Initial Data Schema
 
 ### Utterance Record Structure
+
 ```json
 {
   "sitting_id": "sitting_2023_001",
@@ -110,6 +120,7 @@ The analysis will be documented in `notebooks/du_eda.ipynb` covering:
 ```
 
 ### Motion Record Structure
+
 ```json
 {
   "motion_id": "M2023_001",
@@ -141,6 +152,7 @@ By the end of this phase, we will have:
 ## Next Steps
 
 The findings from this phase will inform the data preparation strategy, particularly:
+
 - Text preprocessing requirements
 - Speaker name standardization needs  
 - Motion linkage algorithm design
