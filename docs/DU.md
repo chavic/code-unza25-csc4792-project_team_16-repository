@@ -2,161 +2,110 @@
 
 **Phase:** [DU] Data Understanding  
 **Date:** 2025  
-**Team:** Team 16  
+**Team:** Team 16
 
-## Data Collection Overview
+## 2.1 Sources & provenance
 
-This phase focuses on gathering and understanding the raw data needed for the parliament relevance classification task.
+- **Debates & Proceedings (index):** public list of House debates by sitting; this is our primary transcript source. ([Parliament of Zambia][1])
+- **Order Papers (index):** agenda for each sitting; provides the **motion text** we will condition on. ([Parliament of Zambia][2])
+- **Votes & Proceedings (index):** timing/outcomes; helps validate date/session alignment across pages. ([Parliament of Zambia][3])
+- **Site structure (top-level):** the National Assembly homepage exposes both the current “Debates and Proceedings” and an **(OLD)** archive—useful when crawling older sessions. ([Parliament of Zambia][4])
+- **Verbatim status:** Parliament’s publications confirm Daily Parliamentary Debates (Hansard) is the official verbatim record; one procedural abstract states it is “essentially a verbatim account”. This justifies text-only modeling as a sound first pass. ([Parliament of Zambia][5])
+- **Custody:** Clerk’s Office is the custodian of records (minutes → Votes & Proceedings), reinforcing provenance. ([Parliament of Zambia][6])
 
-## Data Sources
+## 2.2 What’s on a sitting page (expected fields)
 
-### 1. Parliamentary Sitting Transcripts
+Typical debate pages (by date) include a **session header** and the **verbatim debate text** (e.g., “Daily Parliamentary Debates … The House met at 1430 hours”), from which we’ll segment **speaker turns**. ([Parliament of Zambia][7])  
+Order Paper pages are date-keyed and list the **Order of the Day**, from which we’ll extract the **motion**. ([Parliament of Zambia][8])
 
-- **Source**: Zambian National Assembly website
-- **Format**: HTML pages with structured debate content
-- **Target**: 6-10 sittings from 2023
-- **Content**: Speaker attributions, timestamps, utterance text
-- **Storage**: `data/raw/*.html`
+**Target raw fields to harvest**
 
-### 2. Order Papers
+- From **Debates**: `date`, `assembly/session`, `sitting_title`, `full_text`, implicit `speaker` delimiters (turn headings), stage cues (e.g., “Point of Order”). ([Parliament of Zambia][7])
+- From **Order Paper**: `date`, `order_items[]`, **`motion_text`**. ([Parliament of Zambia][8])
+- From **Votes & Proceedings**: `date`, `sitting_meta`, `outcomes`. ([Parliament of Zambia][3])
 
-- **Source**: Corresponding Order Papers for each sitting date
-- **Format**: PDF or HTML documents
-- **Content**: Motion text, motion IDs, motion movers
-- **Purpose**: Ground truth for what motions were being debated
-- **Storage**: `data/interim/*.json` (extracted motion text)
+## 2.3 Coverage & format realities
 
-## Data Collection Process
+- **Multiple catalogs:** current “Debates & Proceedings” plus “(OLD)” archive—plan for **two index patterns**. ([Parliament of Zambia][4])
+- **Mixed formats:** Some content is HTML node pages; certain documents (procedural abstracts, standing orders) are PDFs—our crawler must support both. ([Parliament of Zambia][9])
 
-### Scraping Workflow
+## 2.4 Join strategy (date/session keyed)
 
-1. **Identify sitting dates** - Select representative sample from 2023
-2. **Download transcripts** - Scrape HTML content with speaker turns
-3. **Fetch Order Papers** - Download corresponding motion documents
-4. **Extract motion text** - Parse structured motion information
-5. **Quality checks** - Verify data completeness and format
+For a given **date**:
 
-### Technical Implementation
+1. pull **Order Paper** → extract **motion**;
+2. pull **Debates** → segment into `(speaker, timestamp?, utterance)`;
+3. (optional) cross-check date/session via **Votes & Proceedings**. ([Parliament of Zambia][2])
 
-```bash
-# Scrape parliamentary sittings
-python -m src.scrape.fetch_sittings --out data/raw/
+## 2.5 Risks & data-quality notes
 
-# Fetch corresponding Order Papers  
-python -m src.scrape.fetch_order_papers --range 2023-01:2023-12 --out data/interim/
-```
+| Risk                            | Why it matters                  | DU action                                                                                                                                                                         |
+| ------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Template drift (old vs new)** | Parser breaks on older sessions | Crawl both catalogs; versioned parsers per template. ([Parliament of Zambia][4])                                                                                                  |
+| **HTML/PDF variance**           | Some docs only as PDFs          | Add PDF text extraction path; keep raw snapshots. ([Parliament of Zambia][9])                                                                                                     |
+| **Ambiguous “relevance” edges** | Label noise                     | Start an annotation guide with concrete on/off-topic examples from Zambia sittings; double-label a subset for κ. (Verbatim status supports fidelity.) ([Parliament of Zambia][5]) |
+| **Session/date mismatches**     | Fragile joins                   | Use **date** as primary key; validate against Votes & Proceedings. ([Parliament of Zambia][3])                                                                                    |
 
-## Exploratory Data Analysis (EDA)
+## 2.6 Data dictionary (processed layer)
 
-### Key Questions to Answer
+We’ll normalize into **utterance-level** rows:
 
-1. How many utterances per sitting on average?
-2. What is the distribution of utterance lengths?
-3. How many unique speakers participate?
-4. What types of motions are most common?
-5. What is the preliminary class distribution (relevant vs not relevant)?
+| Field              | Type    | Source      | Notes                                                                                  |
+| ------------------ | ------- | ----------- | -------------------------------------------------------------------------------------- |
+| `sitting_id`       | string  | Debates     | e.g., `2025-06-25` (date key). ([Parliament of Zambia][1])                             |
+| `assembly_session` | string  | Debates     | “Fourth Session of the Thirteenth Assembly”, when present. ([Parliament of Zambia][8]) |
+| `speaker`          | string  | Debates     | Parsed from turn headings. ([Parliament of Zambia][7])                                 |
+| `timestamp`        | string? | Debates     | If present (“The House met at 1430 hours”). ([Parliament of Zambia][7])                |
+| `utterance_text`   | text    | Debates     | Cleaned verbatim text. ([Parliament of Zambia][7])                                     |
+| `stage_marker`     | enum    | Debates     | e.g., `POINT_OF_ORDER`, `INTERJECTION`.                                                |
+| `motion_text`      | text    | Order Paper | Target text for conditioning. ([Parliament of Zambia][8])                              |
+| `label`            | enum    | Annotation  | `Relevant`/`NotRelevant`                                                               |
+| `split`            | enum    | Processing  | `train`/`val`/`test` (sitting-wise)                                                    |
 
-### Expected Findings
+## 2.7 DU tasks & quick EDA
 
-- **Utterance length**: Expect wide variation from short procedural statements to long policy arguments
-- **Speaker participation**: Some speakers likely much more active than others
-- **Motion types**: Mix of economic, social, and procedural motions
-- **Class imbalance**: Likely more relevant than not relevant utterances
+**DU-01: Crawl small seed set**
 
-### EDA Notebook Structure
+- From the **Debates & Proceedings** index, collect 3–5 recent sittings; store raw HTML with content hashes. ([Parliament of Zambia][1])
+- For the same dates, fetch **Order Papers**; store raw and a text-extracted `motion.txt`. ([Parliament of Zambia][2])
 
-The analysis will be documented in `notebooks/du_eda.ipynb` covering:
+**DU-02: Parse & segment prototype**
 
-1. **Data Loading and Basic Stats**
-   - Number of sittings, utterances, speakers
-   - Date range coverage
-   - File sizes and formats
+- Regex/DOM-based segmentation of speaker turns from one sitting page (verify on at least one older sitting too). ([Parliament of Zambia][7])
 
-2. **Text Analysis**
-   - Utterance length distributions
-   - Most common words and phrases
-   - Speaker vocabulary diversity
+**DU-03: Sanity EDA** (on segmented utterances)
 
-3. **Motion Analysis**
-   - Motion types and categories
-   - Motion text length and complexity
-   - Temporal patterns
+- Histograms: utterance length (tokens), per-speaker turn counts, `%` of stage markers (e.g., Point of Order).
+- Early class prior (using a **lexical-overlap heuristic** with the motion to get **seed labels** for inspection).
 
-4. **Quality Assessment**
-   - Missing data identification
-   - Transcript quality indicators
-   - Motion-sitting linkage success rate
+**DU-04: Data card**
 
-## Data Quality Considerations
+- One-page “data card” documenting sources, date of access, scraping rules, known quirks, and contact—linking the Clerk’s record role for provenance context. ([Parliament of Zambia][6])
 
-### Potential Issues
+## 2.8 Ethics & compliance
 
-- **Incomplete transcripts** - Some utterances may be truncated
-- **Speaker misattribution** - Names might be inconsistent
-- **Timestamp accuracy** - May be approximate rather than precise
-- **Motion linkage** - Order Papers may not perfectly align with debate content
+- We will not use **speaker identity** as a model feature (only for evaluation slices), mitigating shortcut learning and fairness concerns.
+- Keep raw snapshots and extraction scripts in-repo for **reproducibility**.
 
-### Quality Metrics
+---
 
-- Percentage of utterances with clear speaker attribution
-- Percentage of sittings with corresponding Order Papers
-- Average utterance completeness (no truncation markers)
-- Motion-sitting temporal alignment accuracy
+## 2.9 Ready-to-run TODOs (copy into your issue tracker)
 
-## Initial Data Schema
+- [ ] [DU] Seed crawl: 3–5 sittings from **Debates & Proceedings** + matching **Order Papers**; save under `data/raw/`. ([Parliament of Zambia][1])
+- [ ] [DU] Write `parse_segment.py` to produce `data/interim/utterances.jsonl` with `(speaker, utterance_text, stage_marker)` from one sitting. ([Parliament of Zambia][7])
+- [ ] [DU] Extract `motion_text` from Order Papers into `data/interim/<date>_motion.txt`. ([Parliament of Zambia][8])
+- [ ] [DU] EDA notebook: length hist, turns per speaker, marker frequencies; attach screenshots of the source index in `docs/moodle/du/`. ([Parliament of Zambia][1])
+- [ ] [DU] Data card v0.1 with provenance & verbatim references. ([Parliament of Zambia][5])
 
-### Utterance Record Structure
-
-```json
-{
-  "sitting_id": "sitting_2023_001",
-  "utterance_id": "sitting_2023_001_042",
-  "speaker": "Hon. Member Name",
-  "timestamp": "2023-03-15T14:30:00",
-  "text": "Mr. Speaker, I rise to support this important motion...",
-  "motion_id": "M2023_001",
-  "motion_text": "That this House calls upon..."
-}
-```
-
-### Motion Record Structure
-
-```json
-{
-  "motion_id": "M2023_001",
-  "title": "Motion on Economic Development",
-  "text": "That this House calls upon the Government...",
-  "mover": "Hon. Member A",
-  "date": "2023-03-15",
-  "type": "substantive"
-}
-```
-
-## Expected Outcomes
-
-By the end of this phase, we will have:
-
-1. **Raw Data Collection** - 6-10 sitting transcripts and corresponding Order Papers
-2. **Data Understanding** - Clear picture of data structure, quality, and characteristics
-3. **EDA Documentation** - Comprehensive analysis in Jupyter notebook
-4. **Data Issues Identification** - Known limitations and quality concerns
-5. **Processing Strategy** - Plan for data preparation phase based on findings
-
-## Risks Identified
-
-- **Website structure changes** - Scraping may break if site is updated
-- **Access restrictions** - Rate limiting or blocking of automated requests
-- **Data completeness** - Some sittings may have incomplete or missing transcripts
-- **Format inconsistencies** - Different sittings may use different HTML structures
-
-## Next Steps
-
-The findings from this phase will inform the data preparation strategy, particularly:
-
-- Text preprocessing requirements
-- Speaker name standardization needs  
-- Motion linkage algorithm design
-- Annotation sampling strategy
+[1]: https://www.parliament.gov.zm/publications/debates-list?utm_source=chatgpt.com "Debates and Proceedings | National Assembly of Zambia"
+[2]: https://www.parliament.gov.zm/publications/order-paper-list?utm_source=chatgpt.com "Order Paper | National Assembly of Zambia"
+[3]: https://www.parliament.gov.zm/publications/votes-proceedings?utm_source=chatgpt.com "Votes and Proceedings | National Assembly of Zambia"
+[4]: https://www.parliament.gov.zm/?utm_source=chatgpt.com "National Assembly of Zambia"
+[5]: https://www.parliament.gov.zm/node/173?utm_source=chatgpt.com "Publications | National Assembly of Zambia"
+[6]: https://www.parliament.gov.zm/the-clerk?utm_source=chatgpt.com "The Clerk's Office"
+[7]: https://www.parliament.gov.zm/node/1401?utm_source=chatgpt.com "Debates- Thursday, 4th November, 2010"
+[8]: https://www.parliament.gov.zm/node/12397?utm_source=chatgpt.com "Wednesday, 25th June, 2025 | National Assembly of Zambia"
+[9]: https://www.parliament.gov.zm/sites/default/files/images/publication_docs/Abstract%202%20Debate%20In%20Parliament.pdf?utm_source=chatgpt.com "Abstract 2 Debate In Parliament.pdf"
 
 ---
 
