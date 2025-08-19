@@ -2,11 +2,12 @@
 
 **Phase:** [DU] Data Understanding  
 **Date:** 2025  
-**Team:** Team 16
+**Team:** Team 16  
 
 ## 2.1 Sources & provenance
 
 - **Debates & Proceedings (index):** public list of House debates by sitting; this is our primary transcript source. ([Parliament of Zambia][1])
+- **Debates & Proceedings (alternate index):** additional debates listing with separate pagination; crawl alongside the main index. ([Parliament of Zambia][10])
 - **Order Papers (index):** agenda for each sitting; provides the **motion text** we will condition on. ([Parliament of Zambia][2])
 - **Votes & Proceedings (index):** timing/outcomes; helps validate date/session alignment across pages. ([Parliament of Zambia][3])
 - **Site structure (top-level):** the National Assembly homepage exposes both the current “Debates and Proceedings” and an **(OLD)** archive—useful when crawling older sessions. ([Parliament of Zambia][4])
@@ -26,8 +27,10 @@ Order Paper pages are date-keyed and list the **Order of the Day**, from which w
 
 ## 2.3 Coverage & format realities
 
-- **Multiple catalogs:** current “Debates & Proceedings” plus “(OLD)” archive—plan for **two index patterns**. ([Parliament of Zambia][4])
+- **Multiple catalogs:** two debates indices are live: `publications/debates-list` and `publications/debates-proceedings` (alternate). Crawl both, as pagination and coverage differ. ([Parliament of Zambia][1], [Parliament of Zambia][10])
+- **Pagination depth differences:** `order-paper-list` paginates deeper than debates; always crawl until no further results instead of hard-coding page counts. ([Parliament of Zambia][2])
 - **Mixed formats:** Some content is HTML node pages; certain documents (procedural abstracts, standing orders) are PDFs—our crawler must support both. ([Parliament of Zambia][9])
+- **Attachments:** Some pages link to PDF attachments under `/sites/default/files/...`. Store and text-extract these alongside HTML sources when present.
 
 ## 2.4 Join strategy (date/session keyed)
 
@@ -36,6 +39,7 @@ For a given **date**:
 1. pull **Order Paper** → extract **motion**;
 2. pull **Debates** → segment into `(speaker, timestamp?, utterance)`;
 3. (optional) cross-check date/session via **Votes & Proceedings**. ([Parliament of Zambia][2])
+4. Note: Some dates will have an Order Paper without a corresponding debate page in one index (or vice versa). Use both debates indices and prefer node pages as canonical.
 
 ## 2.5 Risks & data-quality notes
 
@@ -45,6 +49,8 @@ For a given **date**:
 | **HTML/PDF variance**           | Some docs only as PDFs          | Add PDF text extraction path; keep raw snapshots. ([Parliament of Zambia][9])                                                                                                     |
 | **Ambiguous “relevance” edges** | Label noise                     | Start an annotation guide with concrete on/off-topic examples from Zambia sittings; double-label a subset for κ. (Verbatim status supports fidelity.) ([Parliament of Zambia][5]) |
 | **Session/date mismatches**     | Fragile joins                   | Use **date** as primary key; validate against Votes & Proceedings. ([Parliament of Zambia][3])                                                                                    |
+| **Dual debates indices**        | Coverage varies by index        | Crawl both `debates-list` and `debates-proceedings` with independent pagination; de-duplicate node links. ([Parliament of Zambia][1], [Parliament of Zambia][10])                 |
+| **Attachment links**            | Missing motion/debate content   | Download and text-extract linked PDFs (keep raw snapshots) under `/sites/default/files/...` when present.                                                                         |
 
 ## 2.6 Data dictionary (processed layer)
 
@@ -66,8 +72,9 @@ We’ll normalize into **utterance-level** rows:
 
 **DU-01: Crawl small seed set**
 
-- From the **Debates & Proceedings** index, collect 3–5 recent sittings; store raw HTML with content hashes. ([Parliament of Zambia][1])
+- From the **Debates & Proceedings** indices (main + alternate), collect 3–5 recent sittings; store raw HTML with content hashes. ([Parliament of Zambia][1], [Parliament of Zambia][10])
 - For the same dates, fetch **Order Papers**; store raw and a text-extracted `motion.txt`. ([Parliament of Zambia][2])
+- Capture any linked attachments (PDFs) for debates and order papers; store under `data/raw/attachments/` and extract text.
 
 **DU-02: Parse & segment prototype**
 
@@ -79,6 +86,8 @@ We’ll normalize into **utterance-level** rows:
 - Early class prior (using a **lexical-overlap heuristic** with the motion to get **seed labels** for inspection).
 
 **DU-04: Data card**
+- Polite crawling: add throttling and a descriptive user-agent; implement content-hash de-duplication to avoid re-downloading identical pages.
+
 
 - One-page “data card” documenting sources, date of access, scraping rules, known quirks, and contact—linking the Clerk’s record role for provenance context. ([Parliament of Zambia][6])
 
@@ -97,15 +106,16 @@ We’ll normalize into **utterance-level** rows:
 - [ ] [DU] EDA notebook: length hist, turns per speaker, marker frequencies; attach screenshots of the source index in `docs/moodle/du/`. ([Parliament of Zambia][1])
 - [ ] [DU] Data card v0.1 with provenance & verbatim references. ([Parliament of Zambia][5])
 
-[1]: https://www.parliament.gov.zm/publications/debates-list?utm_source=chatgpt.com "Debates and Proceedings | National Assembly of Zambia"
-[2]: https://www.parliament.gov.zm/publications/order-paper-list?utm_source=chatgpt.com "Order Paper | National Assembly of Zambia"
-[3]: https://www.parliament.gov.zm/publications/votes-proceedings?utm_source=chatgpt.com "Votes and Proceedings | National Assembly of Zambia"
-[4]: https://www.parliament.gov.zm/?utm_source=chatgpt.com "National Assembly of Zambia"
-[5]: https://www.parliament.gov.zm/node/173?utm_source=chatgpt.com "Publications | National Assembly of Zambia"
-[6]: https://www.parliament.gov.zm/the-clerk?utm_source=chatgpt.com "The Clerk's Office"
-[7]: https://www.parliament.gov.zm/node/1401?utm_source=chatgpt.com "Debates- Thursday, 4th November, 2010"
-[8]: https://www.parliament.gov.zm/node/12397?utm_source=chatgpt.com "Wednesday, 25th June, 2025 | National Assembly of Zambia"
-[9]: https://www.parliament.gov.zm/sites/default/files/images/publication_docs/Abstract%202%20Debate%20In%20Parliament.pdf?utm_source=chatgpt.com "Abstract 2 Debate In Parliament.pdf"
+[1]: https://www.parliament.gov.zm/publications/debates-list "Debates and Proceedings | National Assembly of Zambia"
+[2]: https://www.parliament.gov.zm/publications/order-paper-list "Order Paper | National Assembly of Zambia"
+[3]: https://www.parliament.gov.zm/publications/votes-proceedings "Votes and Proceedings | National Assembly of Zambia"
+[4]: https://www.parliament.gov.zm/ "National Assembly of Zambia"
+[5]: https://www.parliament.gov.zm/node/173 "Publications | National Assembly of Zambia"
+[6]: https://www.parliament.gov.zm/the-clerk "The Clerk's Office"
+[7]: https://www.parliament.gov.zm/node/1401 "Debates- Thursday, 4th November, 2010"
+[8]: https://www.parliament.gov.zm/node/12397 "Wednesday, 25th June, 2025 | National Assembly of Zambia"
+[9]: https://www.parliament.gov.zm/sites/default/files/images/publication_docs/Abstract%202%20Debate%20In%20Parliament.pdf "Abstract 2 Debate In Parliament.pdf"
+[10]: https://www.parliament.gov.zm/publications/debates-proceedings "Debates & Proceedings (alternate) | National Assembly of Zambia"
 
 ---
 
