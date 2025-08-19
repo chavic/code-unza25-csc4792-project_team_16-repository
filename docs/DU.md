@@ -97,15 +97,15 @@ We’ll normalize into **utterance-level** rows:
 - [ ] [DU] EDA notebook: length hist, turns per speaker, marker frequencies; attach screenshots of the source index in `docs/moodle/du/`. ([Parliament of Zambia][1])
 - [ ] [DU] Data card v0.1 with provenance & verbatim references. ([Parliament of Zambia][5])
 
-[1]: https://www.parliament.gov.zm/publications/debates-list?utm_source=chatgpt.com "Debates and Proceedings | National Assembly of Zambia"
-[2]: https://www.parliament.gov.zm/publications/order-paper-list?utm_source=chatgpt.com "Order Paper | National Assembly of Zambia"
-[3]: https://www.parliament.gov.zm/publications/votes-proceedings?utm_source=chatgpt.com "Votes and Proceedings | National Assembly of Zambia"
-[4]: https://www.parliament.gov.zm/?utm_source=chatgpt.com "National Assembly of Zambia"
-[5]: https://www.parliament.gov.zm/node/173?utm_source=chatgpt.com "Publications | National Assembly of Zambia"
-[6]: https://www.parliament.gov.zm/the-clerk?utm_source=chatgpt.com "The Clerk's Office"
-[7]: https://www.parliament.gov.zm/node/1401?utm_source=chatgpt.com "Debates- Thursday, 4th November, 2010"
-[8]: https://www.parliament.gov.zm/node/12397?utm_source=chatgpt.com "Wednesday, 25th June, 2025 | National Assembly of Zambia"
-[9]: https://www.parliament.gov.zm/sites/default/files/images/publication_docs/Abstract%202%20Debate%20In%20Parliament.pdf?utm_source=chatgpt.com "Abstract 2 Debate In Parliament.pdf"
+[1]: https://www.parliament.gov.zm/publications/debates-list "Debates and Proceedings | National Assembly of Zambia"
+[2]: https://www.parliament.gov.zm/publications/order-paper-list "Order Paper | National Assembly of Zambia"
+[3]: https://www.parliament.gov.zm/publications/votes-proceedings "Votes and Proceedings | National Assembly of Zambia"
+[4]: https://www.parliament.gov.zm/ "National Assembly of Zambia"
+[5]: https://www.parliament.gov.zm/node/173 "Publications | National Assembly of Zambia"
+[6]: https://www.parliament.gov.zm/the-clerk "The Clerk's Office"
+[7]: https://www.parliament.gov.zm/node/1401 "Debates- Thursday, 4th November, 2010"
+[8]: https://www.parliament.gov.zm/node/12397 "Wednesday, 25th June, 2025 | National Assembly of Zambia"
+[9]: https://www.parliament.gov.zm/sites/default/files/images/publication_docs/Abstract%202%20Debate%20In%20Parliament.pdf "Abstract 2 Debate In Parliament.pdf"
 
 ---
 

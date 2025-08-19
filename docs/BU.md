@@ -112,7 +112,7 @@ The primary business objectives of this project are:
 
 - **Transparency and Explainability**: Classification decisions should be explainable to users, enabling parliamentary staff and researchers to understand why utterances are classified as relevant or not relevant. The model should provide confidence scores and feature importance to support decision transparency (Westminster Foundation for Democracy, 2025).
 
-- **Political Neutrality and Non-Discrimination**: Ensure the model doesn't discriminate based on speaker identity, political affiliation, or political orientation, as algorithmic bias against political viewpoints can arise in AI systems (Leerssen, 2022). The model should perform consistently across all political parties and individual representatives.
+- **Political Neutrality and Non-Discrimination**: Ensure the model doesn't discriminate based on speaker identity, political affiliation, or political orientation, as algorithmic bias against political viewpoints can arise in automated systems (Leerssen, 2022). The model should perform consistently across all political parties and individual representatives.
 
 - **Fairness Across Demographics**: Minimize bias and ensure fairness across different speaker demographics, including gender, age, constituency, and years of service to prevent systematic disadvantaging of any group (Inter-Parliamentary Union, 2025).
 
@@ -127,9 +127,9 @@ The primary business objectives of this project are:
 - **Impact Assessment**: Monitor for unintended consequences such as potential chilling effects on parliamentary speech or systematic misrepresentation of certain speakers' contributions to debates.
 
 **References:**
-- Inter-Parliamentary Union. (2025). Ethical principles: Fairness and non-discrimination. AI Guidelines for Parliaments.
-- Leerssen, P. (2022). Algorithmic Political Bias in Artificial Intelligence Systems. Philosophy & Technology, 35(2).
-- Westminster Foundation for Democracy. (2025). AI guidelines for parliaments.
+- Inter-Parliamentary Union. (2025). Ethical principles: Fairness and non-discrimination. Guidelines for Parliaments.
+- Leerssen, P. (2022). Algorithmic Political Bias in Information Systems. Philosophy & Technology, 35(2).
+- Westminster Foundation for Democracy. (2025). Guidelines for parliaments.
 - Wikipedia. (2025). Algorithmic bias.
 
 ## Success Criteria
