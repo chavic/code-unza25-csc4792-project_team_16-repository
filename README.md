@@ -90,6 +90,7 @@ code-unza25-csc4792-project_team_16-repository/
 * **Pre-commit hooks:** `ruff`, `black`.
 
 ### 🚨 **SSL Certificate Note**
+
 The Parliament website has SSL certificate issues. The scrapers handle this automatically by disabling SSL verification for the parliament.gov.zm domain only.
 
 ---
@@ -152,22 +153,25 @@ Use a clear, short summary. Use your **UNZA email** for Git/Colab.
 ## 7) Data sources & pipeline
 
 ### **Data Sources (Zambian National Assembly)**
+
 - **Main debates index:** `https://www.parliament.gov.zm/publications/debates-list`
-- **Alternate debates index:** `https://www.parliament.gov.zm/publications/debates-proceedings`
-- **Order papers index:** `https://www.parliament.gov.zm/publications/order-paper-list`
-- **Votes & proceedings:** `https://www.parliament.gov.zm/publications/votes-proceedings` (validation)
+* **Alternate debates index:** `https://www.parliament.gov.zm/publications/debates-proceedings`
+* **Order papers index:** `https://www.parliament.gov.zm/publications/order-paper-list`
+* **Votes & proceedings:** `https://www.parliament.gov.zm/publications/votes-proceedings` (validation)
 
 ### **Pipeline**
+
 1. **Scrape** National Assembly debates/proceedings (by sitting) → `data/raw/`.
 2. **Fetch** the same day's **Order Paper** → extract motion text → `data/interim/`.
 3. **Parse & segment** transcripts into speaker turns; **link** each turn to its motion.
 4. **Persist** as JSONL; generate splits and feature stores.
 
 ### **🎯 Complete Dataset Scraped (50.6MB)**
+
 - **199 parliamentary debates** (43MB) with full transcripts and speaker attribution
-- **200 order papers** (7.6MB) with motion text and session information
-- **Date range:** 2022-2025 with comprehensive historical coverage
-- **Success rate:** 99.5% for debates, 100% for order papers
+* **200 order papers** (7.6MB) with motion text and session information
+* **Date range:** 2022-2025 with comprehensive historical coverage
+* **Success rate:** 99.5% for debates, 100% for order papers
 
 Our repo includes raw & pre-processed data and a reproducible notebook showing extraction → implementation → evaluation → deployment.
 
@@ -254,8 +258,8 @@ python -m src.scrape.fetch_order_papers \
 # 3) Parse & segment to utterances
 python -m src.parse.segment --in data/raw/ --order-papers-dir data/interim/ --out data/interim/utterances.jsonl
 
-# 4) Create labeled subset for annotation
-python -m src.label.make_seed --in data/interim/utterances.jsonl --n 1000 --out data/processed/seed.csv
+# 4) Create automated annotations (recommended)
+python -m src.label.auto_annotate --in data/interim/utterances.jsonl --out data/processed/auto_annotated.csv --max-utterances 1000
 
 # 5) Create train/val/test splits
 python -m src.parse.split_data --in data/interim/utterances.jsonl --out data/processed/splits/
@@ -302,12 +306,43 @@ python -m src.parse.segment \
 ```
 
 **Output:** JSONL file with structured utterances:
-- Speaker identification and timestamps
-- Cleaned text content with word/character counts
-- Motion linkage (when available)
-- Session and assembly information
+* Speaker identification and timestamps
+* Cleaned text content with word/character counts
+* Motion linkage (when available)
+* Session and assembly information
 
 ### **🏷️ Step 2: Create Annotation Dataset**
+
+#### **Option A: Automated Annotation (Recommended)**
+
+Use Gemma 3:270M via Ollama for fast, automated labeling:
+
+```bash
+# Install Ollama and pull Gemma 3:270M (if not already done)
+ollama pull gemma3:270m
+
+# Create automated annotations (500 utterances)
+python -m src.label.auto_annotate \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/auto_annotated_large.csv \
+  --max-utterances 500 \
+  --delay 0.5
+
+# Create smaller test set (50 utterances)
+python -m src.label.auto_annotate \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/auto_annotated_test.csv \
+  --max-utterances 50 \
+  --delay 0.8
+```
+
+**Output:** CSV file with automated relevance labels:
+* LLM-generated "RELEVANT" or "NOT_RELEVANT" labels
+* Explanations for each annotation decision
+* Confidence scores and raw model responses
+* Ready for model training or manual review
+
+#### **Option B: Manual Annotation**
 
 Generate balanced samples for manual annotation:
 
@@ -326,10 +361,10 @@ python -m src.label.make_seed \
 ```
 
 **Output:** CSV file ready for manual annotation with:
-- Utterance text and motion context
-- Empty columns for relevance labels
-- Annotator name and confidence fields
-- Clear annotation instructions
+* Utterance text and motion context
+* Empty columns for relevance labels
+* Annotator name and confidence fields
+* Clear annotation instructions
 
 ### **✂️ Step 3: Create Data Splits**
 
@@ -351,35 +386,109 @@ python -m src.parse.split_data \
 ```
 
 **Output:** Three JSONL files + metadata:
-- `train.jsonl` - Training utterances (70%)
-- `val.jsonl` - Validation utterances (15%) 
-- `test.jsonl` - Test utterances (15%)
-- `split_metadata.json` - Split statistics and ratios
+* `train.jsonl` - Training utterances (70%)
+* `val.jsonl` - Validation utterances (15%)
+* `test.jsonl` - Test utterances (15%)
+* `split_metadata.json` - Split statistics and ratios
 
 ### **📊 Data Preparation Results**
 
 After running the complete pipeline:
 
-- **Total Utterances**: 90,098 from 404 sittings
-- **Unique Speakers**: 760 parliamentarians
-- **Motion-Linked**: 1,484 utterances (1.6%)
-- **Average Length**: 97.1 words per utterance
-- **Date Range**: 2022-2025 (3+ years of debates)
-- **Split Sizes**: 63K train, 13.5K val, 13.5K test
+* **Total Utterances**: 90,098 from 404 sittings
+* **Unique Speakers**: 760 parliamentarians
+* **Motion-Linked**: 1,484 utterances (1.6%)
+* **Average Length**: 97.1 words per utterance
+* **Date Range**: 2022-2025 (3+ years of debates)
+* **Split Sizes**: 63K train, 13.5K val, 13.5K test
+
+---
+
+## **🤖 Automated Annotation System**
+
+### **Overview**
+
+The project includes an automated annotation system using **Gemma 3:270M** via Ollama to generate relevance labels for parliamentary utterances. This significantly speeds up the annotation process and creates large labeled datasets for training.
+
+### **Features**
+
+* **Local LLM Processing**: Uses Gemma 3:270M running locally via Ollama
+* **Strict Relevance Criteria**: Carefully designed prompts for consistent labeling
+* **Motion-Aware**: Prioritizes utterances with linked motions for better context
+* **Batch Processing**: Handles large datasets with configurable delays
+* **Quality Control**: Includes explanations and confidence tracking
+
+### **Setup Requirements**
+
+```bash
+# Install Ollama (if not already installed)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull the Gemma 3:270M model
+ollama pull gemma3:270m
+
+# Verify installation
+ollama list
+```
+
+### **Usage Examples**
+
+```bash
+# Basic automated annotation
+python -m src.label.auto_annotate \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/auto_annotated.csv \
+  --max-utterances 1000
+
+# Custom configuration
+python -m src.label.auto_annotate \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/auto_annotated.csv \
+  --max-utterances 500 \
+  --delay 0.5 \
+  --model gemma3:270m \
+  --ollama-url http://localhost:11434
+```
+
+### **Annotation Quality**
+
+Based on testing with 500 utterances:
+* **Label Distribution**: 97.6% RELEVANT, 2.4% NOT_RELEVANT
+* **Processing Speed**: ~4.3 seconds per utterance
+* **Motion Coverage**: 100% of motion-linked utterances processed
+* **Speaker Diversity**: 81 unique speakers in test dataset
+
+### **Output Format**
+
+The automated annotation system generates CSV files with:
+* Original utterance data (speaker, text, motion context)
+* LLM-generated labels (`RELEVANT`/`NOT_RELEVANT`)
+* Explanations for each decision
+* Raw model responses for debugging
+* Confidence scores and metadata
+
+### **Quality Assessment**
+
+To validate annotation quality:
+
+1. **Manual Spot Checks**: Review random samples for accuracy
+2. **Inter-Annotator Agreement**: Compare with manual annotations
+3. **Edge Case Analysis**: Examine difficult cases and model reasoning
+4. **Performance Metrics**: Use labeled data to train and evaluate models
 
 ### **📊 Scraper Options**
 
 **Debates Scraper (`fetch_sittings`):**
-- `--num-sittings`: Number of debate transcripts to scrape (default: 10)
-- `--delay`: Delay between requests in seconds (default: 1.0, recommended: 1.5-2.0)
-- `--max-pages`: Maximum index pages to crawl (default: 5, full site: 15)
-- `--use-alt-index`: Also scrape alternate debates index for broader coverage
-- `--start-year`: Starting year filter (default: 2023)
+* `--num-sittings`: Number of debate transcripts to scrape (default: 10)
+* `--delay`: Delay between requests in seconds (default: 1.0, recommended: 1.5-2.0)
+* `--max-pages`: Maximum index pages to crawl (default: 5, full site: 15)
+* `--use-alt-index`: Also scrape alternate debates index for broader coverage
+* `--start-year`: Starting year filter (default: 2023)
 
 **Order Papers Scraper (`fetch_order_papers`):**
-- `--max-papers`: Number of order papers to scrape (default: 100)
-- `--delay`: Delay between requests in seconds (default: 1.0)
-- `--max-pages`: Maximum index pages to crawl (default: 10, full site: 15)
+* `--max-papers`: Number of order papers to scrape (default: 100)
+* `--delay`: Delay between requests in seconds (default: 1.0)
+* `--max-pages`: Maximum index pages to crawl (default: 10, full site: 15)
 
 ### **📁 Expected Output Structure**
 
@@ -411,6 +520,7 @@ head -50 data/interim/order_paper_*.json  # Check motion extraction
 ### **🛠️ Troubleshooting**
 
 **SSL Certificate Errors:**
+
 ```bash
 # The scrapers automatically handle SSL issues, but if you see certificate errors:
 # - Check internet connection
@@ -419,6 +529,7 @@ head -50 data/interim/order_paper_*.json  # Check motion extraction
 ```
 
 **Timeout Errors:**
+
 ```bash
 # If you get timeout errors:
 # - Increase the --delay parameter (try 2.0 or 3.0)
@@ -427,6 +538,7 @@ head -50 data/interim/order_paper_*.json  # Check motion extraction
 ```
 
 **Memory Issues:**
+
 ```bash
 # For large scrapes, monitor memory usage:
 htop  # or Activity Monitor on macOS
@@ -434,6 +546,7 @@ htop  # or Activity Monitor on macOS
 ```
 
 **Partial Scraping Results:**
+
 ```bash
 # If scraping stops early:
 # - Check the terminal output for specific error messages
@@ -443,15 +556,16 @@ htop  # or Activity Monitor on macOS
 
 ### **📈 Performance Notes**
 
-- **Full scraping time:** ~15 minutes (199 debates + 200 order papers)
-- **Network requirements:** Stable internet connection
-- **Disk space:** ~51MB for complete dataset
-- **Politeness:** Built-in delays respect server resources
-- **Deduplication:** Content hashing prevents re-downloading
+* **Full scraping time:** ~15 minutes (199 debates + 200 order papers)
+* **Network requirements:** Stable internet connection
+* **Disk space:** ~51MB for complete dataset
+* **Politeness:** Built-in delays respect server resources
+* **Deduplication:** Content hashing prevents re-downloading
 
 ### **📋 Data Documentation**
 
 #### **Debate Files Structure (`data/raw/`)**
+
 ```json
 {
   "url": "https://www.parliament.gov.zm/node/12493",
@@ -466,6 +580,7 @@ htop  # or Activity Monitor on macOS
 ```
 
 #### **Order Paper Files Structure (`data/interim/`)**
+
 ```json
 {
   "url": "https://www.parliament.gov.zm/node/12469",
@@ -497,12 +612,14 @@ htop  # or Activity Monitor on macOS
 ```
 
 #### **File Naming Convention**
+
 - **Debates:** `sitting_{date}_{node_id}_{hash}.{html|json}`
-- **Order Papers:** `order_paper_{date}_{node_id}_{hash}.{html|json}`
-- **Date format:** `YYYY-MM-DD` (e.g., `2025-07-15`)
-- **Content hash:** First 8 characters of MD5 hash for deduplication
+* **Order Papers:** `order_paper_{date}_{node_id}_{hash}.{html|json}`
+* **Date format:** `YYYY-MM-DD` (e.g., `2025-07-15`)
+* **Content hash:** First 8 characters of MD5 hash for deduplication
 
 #### **🚨 Important: Data Not in Git**
+
 The scraped data files (50.6MB total) are excluded from git via `.gitignore` to keep the repository size manageable. To replicate the full dataset:
 
 1. Clone the repository
