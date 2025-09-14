@@ -78,7 +78,8 @@ class ParliamentaryBERTClassifier(nn.Module):
         
     def forward(self, input_ids, attention_mask):
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
-        pooled_output = outputs.pooler_output
+        # For DistilBERT, use the [CLS] token (first token) from last_hidden_state
+        pooled_output = outputs.last_hidden_state[:, 0]  # [CLS] token
         output = self.dropout(pooled_output)
         return self.classifier(output)
 
@@ -196,7 +197,7 @@ def main(
         learning_rate=learning_rate,
         logging_dir=str(out / "logs"),
         logging_steps=10,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=50,
         save_strategy="steps",
         save_steps=50,
