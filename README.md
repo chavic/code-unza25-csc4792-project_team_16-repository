@@ -252,15 +252,18 @@ python -m src.scrape.fetch_order_papers \
   --max-pages 15
 
 # 3) Parse & segment to utterances
-python -m src.parse.segment --in data/raw/ --order-papers data/interim/ --out data/interim/utterances.jsonl
+python -m src.parse.segment --in data/raw/ --order-papers-dir data/interim/ --out data/interim/utterances.jsonl
 
-# 4) Create labeled subset for DP
+# 4) Create labeled subset for annotation
 python -m src.label.make_seed --in data/interim/utterances.jsonl --n 1000 --out data/processed/seed.csv
 
-# 5) Train baselines
+# 5) Create train/val/test splits
+python -m src.parse.split_data --in data/interim/utterances.jsonl --out data/processed/splits/
+
+# 6) Train baselines
 python -m src.models.train_baselines --in data/processed/ --out experiments/runs/baseline_svm/
 
-# 6) Evaluate & plot
+# 7) Evaluate & plot
 python -m src.eval.report --run experiments/runs/baseline_svm/ --out reports/figs/
 ```
 
@@ -270,7 +273,99 @@ python -m src.eval.report --run experiments/runs/baseline_svm/ --out reports/fig
 # Test with just a few sittings (for development/testing)
 python -m src.scrape.fetch_sittings --out data/raw --num-sittings 5 --delay 2.0 --max-pages 1
 python -m src.scrape.fetch_order_papers --out data/interim --max-papers 5 --delay 2.0 --max-pages 1
+
+# Process test data
+python -m src.parse.segment --in data/raw/ --order-papers-dir data/interim/ --out data/interim/utterances_test.jsonl --max-files 5
 ```
+
+---
+
+## **📋 Data Preparation Pipeline**
+
+### **🔄 Step 1: Parse HTML to Utterances**
+
+Convert scraped HTML debate transcripts into structured speaker utterances:
+
+```bash
+# Process all scraped debates
+python -m src.parse.segment \
+  --in data/raw/ \
+  --order-papers-dir data/interim/ \
+  --out data/interim/utterances_full.jsonl
+
+# Test with small sample (for development)
+python -m src.parse.segment \
+  --in data/raw/ \
+  --order-papers-dir data/interim/ \
+  --out data/interim/utterances_test.jsonl \
+  --max-files 10
+```
+
+**Output:** JSONL file with structured utterances:
+- Speaker identification and timestamps
+- Cleaned text content with word/character counts
+- Motion linkage (when available)
+- Session and assembly information
+
+### **🏷️ Step 2: Create Annotation Dataset**
+
+Generate balanced samples for manual annotation:
+
+```bash
+# Create seed annotation set (100 utterances)
+python -m src.label.make_seed \
+  --in data/interim/utterances_full.jsonl \
+  --n 100 \
+  --out data/processed/seed_annotation.csv
+
+# Create larger annotation set (1000 utterances)
+python -m src.label.make_seed \
+  --in data/interim/utterances_full.jsonl \
+  --n 1000 \
+  --out data/processed/annotation_dataset.csv
+```
+
+**Output:** CSV file ready for manual annotation with:
+- Utterance text and motion context
+- Empty columns for relevance labels
+- Annotator name and confidence fields
+- Clear annotation instructions
+
+### **✂️ Step 3: Create Data Splits**
+
+Generate sitting-wise train/validation/test splits:
+
+```bash
+# Create standard 70/15/15 splits
+python -m src.parse.split_data \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/splits/
+
+# Custom split ratios
+python -m src.parse.split_data \
+  --in data/interim/utterances_full.jsonl \
+  --out data/processed/splits/ \
+  --train-ratio 0.8 \
+  --val-ratio 0.1 \
+  --test-ratio 0.1
+```
+
+**Output:** Three JSONL files + metadata:
+- `train.jsonl` - Training utterances (70%)
+- `val.jsonl` - Validation utterances (15%) 
+- `test.jsonl` - Test utterances (15%)
+- `split_metadata.json` - Split statistics and ratios
+
+### **📊 Data Preparation Results**
+
+After running the complete pipeline:
+
+- **Total Utterances**: 90,098 from 404 sittings
+- **Unique Speakers**: 760 parliamentarians
+- **Motion-Linked**: 1,484 utterances (1.6%)
+- **Average Length**: 97.1 words per utterance
+- **Date Range**: 2022-2025 (3+ years of debates)
+- **Split Sizes**: 63K train, 13.5K val, 13.5K test
 
 ### **📊 Scraper Options**
 
