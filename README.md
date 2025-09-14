@@ -476,6 +476,73 @@ To validate annotation quality:
 3. **Edge Case Analysis**: Examine difficult cases and model reasoning
 4. **Performance Metrics**: Use labeled data to train and evaluate models
 
+---
+
+## **🤖 Model Training & Evaluation**
+
+### **Baseline Model Training**
+
+Train baseline models using the auto-annotated dataset:
+
+```bash
+# Train baseline models (SVM and Logistic Regression)
+python -m src.models.train_baselines \
+  --in data/processed/ \
+  --out experiments/runs/baseline_auto_annotated/
+
+# Generate evaluation reports and visualizations
+python -m src.eval.report \
+  --run-dir experiments/runs/baseline_auto_annotated/ \
+  --out reports/figs/
+```
+
+### **Model Performance Results**
+
+**Dataset:** 500 auto-annotated utterances (97.6% RELEVANT, 2.4% NOT_RELEVANT)
+**Train/Test Split:** 400/100 utterances
+**Features:** 7,148 TF-IDF features (1-2 grams, English stopwords)
+
+| Model | Accuracy | Macro F1 | Relevant Recall | Relevant Precision | Features |
+|-------|----------|----------|-----------------|-------------------|----------|
+| Logistic Regression | 98.0% | 49.5% | 100.0% | 98.0% | 7,148 |
+| SVM | 98.0% | 49.5% | 100.0% | 98.0% | 7,148 |
+
+### **Key Findings**
+
+- **High Accuracy**: Both models achieve 98% accuracy on the test set
+- **Class Imbalance Issue**: Models struggle with the minority class (NOT_RELEVANT)
+- **Perfect Recall for RELEVANT**: Models correctly identify all relevant utterances
+- **Zero Recall for NOT_RELEVANT**: Models fail to identify any non-relevant utterances
+- **Identical Performance**: Both SVM and Logistic Regression show identical results
+
+### **Analysis & Next Steps**
+
+**Current Limitations:**
+1. **Severe Class Imbalance**: 97.6% vs 2.4% distribution affects minority class performance
+2. **Overfitting to Majority Class**: Models default to predicting RELEVANT for all cases
+3. **Limited NOT_RELEVANT Examples**: Only 12 examples in training set
+
+**Recommended Improvements:**
+1. **Balanced Sampling**: Create more balanced training sets
+2. **Advanced Features**: Implement sentence embeddings and similarity scores
+3. **Ensemble Methods**: Combine multiple models for better performance
+4. **Data Augmentation**: Generate more NOT_RELEVANT examples
+5. **Cost-Sensitive Learning**: Weight minority class more heavily
+
+### **Generated Artifacts**
+
+- **Model Files**: `experiments/runs/baseline_auto_annotated/`
+  - `logistic_regression/model.pkl` - Trained logistic regression model
+  - `svm/model.pkl` - Trained SVM model
+  - `*/vectorizer.pkl` - TF-IDF vectorizers
+  - `*/metrics.json` - Detailed performance metrics
+
+- **Evaluation Reports**: `reports/figs/`
+  - `confusion_matrix_*.png` - Confusion matrix visualizations
+  - `metrics_comparison.png` - Model comparison charts
+  - `metrics_table.png` - Performance metrics table
+  - `metrics_comparison.csv` - Raw metrics data
+
 ### **📊 Scraper Options**
 
 **Debates Scraper (`fetch_sittings`):**
