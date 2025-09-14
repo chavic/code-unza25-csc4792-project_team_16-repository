@@ -496,10 +496,29 @@ python -m src.eval.report \
   --out reports/figs/
 ```
 
+### **Advanced Model Training (Sentence Transformers)**
+
+Train advanced models using sentence embeddings:
+
+```bash
+# Train sentence transformer-based classifiers
+python -m src.models.train_sentence_transformer \
+  --in data/processed/ \
+  --out experiments/runs/sentence_transformer/ \
+  --classifiers "logistic,svm,rf"
+
+# Generate evaluation reports
+python -m src.eval.report \
+  --run-dir experiments/runs/sentence_transformer/ \
+  --out reports/figs/
+```
+
 ### **Model Performance Results**
 
 **Dataset:** 500 auto-annotated utterances (97.6% RELEVANT, 2.4% NOT_RELEVANT)
 **Train/Test Split:** 400/100 utterances
+
+#### **Baseline Models (TF-IDF Features)**
 **Features:** 7,148 TF-IDF features (1-2 grams, English stopwords)
 
 | Model | Accuracy | Macro F1 | Relevant Recall | Relevant Precision | Features |
@@ -507,13 +526,23 @@ python -m src.eval.report \
 | Logistic Regression | 98.0% | 49.5% | 100.0% | 98.0% | 7,148 |
 | SVM | 98.0% | 49.5% | 100.0% | 98.0% | 7,148 |
 
+#### **Advanced Models (Sentence Transformers)**
+**Features:** 384-dimensional sentence embeddings (all-MiniLM-L6-v2)
+
+| Model | Accuracy | Macro F1 | Relevant Recall | Relevant Precision | Features |
+|-------|----------|----------|-----------------|-------------------|----------|
+| Sentence Transformer + Logistic | 98.0% | 49.5% | 100.0% | 98.0% | 384 |
+| Sentence Transformer + SVM | 98.0% | 49.5% | 100.0% | 98.0% | 384 |
+| Sentence Transformer + Random Forest | 98.0% | 49.5% | 100.0% | 98.0% | 384 |
+
 ### **Key Findings**
 
-- **High Accuracy**: Both models achieve 98% accuracy on the test set
-- **Class Imbalance Issue**: Models struggle with the minority class (NOT_RELEVANT)
+- **High Accuracy**: All models achieve 98% accuracy on the test set
+- **Class Imbalance Issue**: All models struggle with the minority class (NOT_RELEVANT)
 - **Perfect Recall for RELEVANT**: Models correctly identify all relevant utterances
 - **Zero Recall for NOT_RELEVANT**: Models fail to identify any non-relevant utterances
-- **Identical Performance**: Both SVM and Logistic Regression show identical results
+- **Identical Performance**: All models show identical results due to severe class imbalance
+- **Feature Engineering Impact**: Sentence transformers (384D) vs TF-IDF (7,148D) show same performance
 
 ### **Analysis & Next Steps**
 
@@ -531,11 +560,19 @@ python -m src.eval.report \
 
 ### **Generated Artifacts**
 
-- **Model Files**: `experiments/runs/baseline_auto_annotated/`
+- **Baseline Models**: `experiments/runs/baseline_auto_annotated/`
   - `logistic_regression/model.pkl` - Trained logistic regression model
   - `svm/model.pkl` - Trained SVM model
   - `*/vectorizer.pkl` - TF-IDF vectorizers
   - `*/metrics.json` - Detailed performance metrics
+
+- **Advanced Models**: `experiments/runs/sentence_transformer/`
+  - `logistic/classifier.pkl` - Logistic regression on embeddings
+  - `svm/classifier.pkl` - SVM on embeddings
+  - `rf/classifier.pkl` - Random Forest on embeddings
+  - `*/sentence_transformer/` - Saved sentence transformer models
+  - `*/metrics.json` - Detailed performance metrics
+  - `all_metrics.json` - Combined metrics for all models
 
 - **Evaluation Reports**: `reports/figs/`
   - `confusion_matrix_*.png` - Confusion matrix visualizations
