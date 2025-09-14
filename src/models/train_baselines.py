@@ -39,21 +39,46 @@ def main(
     
     out.mkdir(parents=True, exist_ok=True)
     
-    # Load labeled data
-    labeled_file = input_dir / "seed.csv"
-    if not labeled_file.exists():
-        typer.echo(f"Error: Labeled data file not found at {labeled_file}")
+    # Load labeled data - try multiple possible file names
+    possible_files = [
+        input_dir / "auto_annotated_large.csv",
+        input_dir / "auto_annotated_improved.csv", 
+        input_dir / "auto_annotated_test.csv",
+        input_dir / "seed_annotation.csv",
+        input_dir / "seed.csv"
+    ]
+    
+    labeled_file = None
+    for file_path in possible_files:
+        if file_path.exists():
+            labeled_file = file_path
+            break
+    
+    if not labeled_file:
+        typer.echo(f"Error: No labeled data file found. Tried: {[str(f) for f in possible_files]}")
         raise typer.Exit(1)
     
+    typer.echo(f"Loading labeled data from: {labeled_file}")
     df = pd.read_csv(labeled_file)
     
+    # Determine label column name
+    label_column = None
+    for col in ['llm_label', 'label']:
+        if col in df.columns:
+            label_column = col
+            break
+    
+    if not label_column:
+        typer.echo(f"Error: No label column found. Available columns: {list(df.columns)}")
+        raise typer.Exit(1)
+    
     # Filter out unlabeled rows
-    df = df[df['label'].notna() & (df['label'] != '')]
-    typer.echo(f"Loaded {len(df)} labeled utterances")
+    df = df[df[label_column].notna() & (df[label_column] != '') & (df[label_column] != 'UNKNOWN')]
+    typer.echo(f"Loaded {len(df)} labeled utterances using column '{label_column}'")
     
     # Prepare features and labels
     X_text = prepare_text_features(df)
-    y = df['label'].values
+    y = df[label_column].values
     
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(
@@ -104,15 +129,22 @@ def main(
         joblib.dump(vectorizer, model_dir / "vectorizer.pkl")
         
         # Save metrics
+        label_dist = dict(zip(*np.unique(y, return_counts=True)))
+        # Convert numpy types to Python types for JSON serialization
+        label_dist = {k: int(v) for k, v in label_dist.items()}
+        
         metrics = {
             'model_name': model_name,
-            'test_accuracy': report['accuracy'],
-            'macro_f1': report['macro avg']['f1-score'],
-            'relevant_recall': report.get('Relevant', {}).get('recall', 0),
-            'relevant_precision': report.get('Relevant', {}).get('precision', 0),
+            'test_accuracy': float(report['accuracy']),
+            'macro_f1': float(report['macro avg']['f1-score']),
+            'relevant_recall': float(report.get('RELEVANT', {}).get('recall', 0)),
+            'relevant_precision': float(report.get('RELEVANT', {}).get('precision', 0)),
+            'not_relevant_recall': float(report.get('NOT_RELEVANT', {}).get('recall', 0)),
+            'not_relevant_precision': float(report.get('NOT_RELEVANT', {}).get('precision', 0)),
             'classification_report': report,
             'confusion_matrix': cm.tolist(),
-            'feature_count': X_train_vec.shape[1]
+            'feature_count': int(X_train_vec.shape[1]),
+            'label_distribution': label_dist
         }
         
         with open(model_dir / "metrics.json", 'w') as f:
