@@ -9,6 +9,7 @@
 - Francis Kalunga, 2021518884, francis.kalunga@cs.unza.zm
 - Victor Chabunda, 2021422496, victor.chabunda@cs.unza.zm
 - Constance Chilamo, 2021517420, chilamo.constance@cs.unza.zm
+- Lisarett Banda, 2021541231, lisarett.banda@cs.unza.zm
 
 ## Problem Statement
 
