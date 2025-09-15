@@ -5,6 +5,7 @@
 This report presents a comprehensive analysis of Zambian parliamentary debates, focusing on the development of automated systems to classify utterance relevance to parliamentary motions. We implemented a complete end-to-end pipeline from data scraping to advanced machine learning models, achieving 98% accuracy while identifying critical challenges in class imbalance.
 
 **Key Achievements:**
+
 - ✅ Complete data pipeline: scraping → parsing → annotation → modeling
 - ✅ 500 auto-annotated utterances using Gemma 3:270M
 - ✅ Multiple model architectures: TF-IDF baselines + Sentence Transformers
@@ -16,16 +17,18 @@ This report presents a comprehensive analysis of Zambian parliamentary debates, 
 ## 1. Project Overview
 
 ### 1.1 Objectives
+
 - **Primary Goal**: Automatically classify parliamentary utterances as relevant or not relevant to their associated motions
-- **Secondary Goals**: 
+- **Secondary Goals**:
   - Build scalable data collection pipeline
   - Implement automated annotation system
   - Compare traditional vs. advanced NLP approaches
   - Identify challenges and improvement opportunities
 
 ### 1.2 Dataset Scope
+
 - **Source**: Zambian Parliament website (parliament.gov.zm)
-- **Data Types**: 
+- **Data Types**:
   - Parliamentary debate transcripts (HTML)
   - Order papers with motion texts (JSON)
 - **Time Period**: 2024 parliamentary sessions
@@ -38,6 +41,7 @@ This report presents a comprehensive analysis of Zambian parliamentary debates, 
 ### 2.1 Data Collection Pipeline
 
 #### Step 1: Web Scraping
+
 ```bash
 # Scrape parliamentary debates
 python -m src.scrape.fetch_sittings --num-sittings 10 --delay 1.5
@@ -47,11 +51,13 @@ python -m src.scrape.fetch_order_papers --num-papers 10 --delay 1.5
 ```
 
 **Results:**
+
 - 10 debate transcripts (HTML format)
 - 10 order papers (JSON format)
 - Structured data with timestamps and metadata
 
 #### Step 2: Data Parsing and Segmentation
+
 ```bash
 # Parse HTML to structured utterances
 python -m src.parse.segment \
@@ -61,18 +67,21 @@ python -m src.parse.segment \
 ```
 
 **Key Features:**
+
 - HTML parsing with BeautifulSoup
 - Speaker identification and utterance segmentation
 - Motion linkage using Jaccard similarity
 - Timestamp generation and metadata extraction
 
 **Output Statistics:**
+
 - 2,000+ utterances extracted
 - 97.6% linked to relevant motions
 - Average 15.2 words per utterance
 - 45 unique speakers identified
 
 #### Step 3: Automated Annotation
+
 ```bash
 # Generate automated labels using Gemma 3:270M
 python -m src.label.auto_annotate \
@@ -83,18 +92,21 @@ python -m src.label.auto_annotate \
 ```
 
 **Annotation System Features:**
+
 - LLM-based relevance classification
 - Strict relevance criteria with examples
 - Confidence scoring and explanations
 - Quality control mechanisms
 
 **Annotation Results:**
+
 - 500 utterances annotated
 - 97.6% RELEVANT, 2.4% NOT_RELEVANT
 - High confidence scores (average 0.89)
 - Detailed explanations for each decision
 
 #### Step 4: Data Splitting
+
 ```bash
 # Create sitting-wise train/val/test splits
 python -m src.parse.split_data \
@@ -104,6 +116,7 @@ python -m src.parse.split_data \
 ```
 
 **Split Strategy:**
+
 - Sitting-wise splits to prevent data leakage
 - 70% train, 15% validation, 15% test
 - Stratified sampling to maintain class distribution
@@ -115,6 +128,7 @@ python -m src.parse.split_data \
 #### 2.2.1 Baseline Models (TF-IDF Features)
 
 **Implementation:**
+
 ```bash
 # Train baseline models
 python -m src.models.train_baselines \
@@ -123,6 +137,7 @@ python -m src.models.train_baselines \
 ```
 
 **Model Specifications:**
+
 - **Features**: 7,148 TF-IDF features (1-2 grams, English stopwords)
 - **Models**: Logistic Regression, Support Vector Machine
 - **Preprocessing**: Text normalization, stopword removal
@@ -131,6 +146,7 @@ python -m src.models.train_baselines \
 #### 2.2.2 Advanced Models (Sentence Transformers)
 
 **Implementation:**
+
 ```bash
 # Train sentence transformer models
 python -m src.models.train_sentence_transformer \
@@ -140,6 +156,7 @@ python -m src.models.train_sentence_transformer \
 ```
 
 **Model Specifications:**
+
 - **Base Model**: all-MiniLM-L6-v2 (384-dimensional embeddings)
 - **Classifiers**: Logistic Regression, SVM, Random Forest
 - **Text Processing**: Motion-utterance concatenation with [SEP] token
@@ -162,6 +179,7 @@ python -m src.models.train_sentence_transformer \
 ### 3.2 Confusion Matrix Analysis
 
 **All Models Show Identical Confusion Matrices:**
+
 ```
                 Predicted
 Actual    NOT_RELEVANT  RELEVANT
@@ -170,6 +188,7 @@ RELEVANT          0       98
 ```
 
 **Key Observations:**
+
 - **Perfect RELEVANT Recall**: 100% - models catch all relevant utterances
 - **Zero NOT_RELEVANT Recall**: 0% - models miss all non-relevant utterances
 - **High Accuracy**: 98% due to class imbalance (98/100 correct predictions)
@@ -177,12 +196,14 @@ RELEVANT          0       98
 ### 3.3 Class Distribution Analysis
 
 **Dataset Composition:**
+
 - **Total Utterances**: 500
 - **RELEVANT**: 488 (97.6%)
 - **NOT_RELEVANT**: 12 (2.4%)
 - **Imbalance Ratio**: 40.7:1
 
 **Impact on Model Behavior:**
+
 - Models default to predicting majority class (RELEVANT)
 - High accuracy achieved by always predicting RELEVANT
 - Minority class completely ignored by all models
@@ -193,7 +214,7 @@ RELEVANT          0       98
 
 ### 4.1 Technical Findings
 
-1. **Feature Engineering Impact**: 
+1. **Feature Engineering Impact**:
    - Sentence transformers (384D) vs TF-IDF (7,148D) show identical performance
    - Problem is not feature quality but class distribution
 
@@ -239,11 +260,13 @@ RELEVANT          0       98
 **Problem**: Severe class imbalance (97.6% vs 2.4%) causes models to default to majority class prediction.
 
 **Evidence**:
+
 - All models show identical performance
 - Zero recall for minority class
 - High accuracy misleading due to imbalance
 
 **Impact**:
+
 - Models fail to identify non-relevant utterances
 - Limited practical utility for minority class detection
 - Biased toward always predicting relevance
@@ -272,6 +295,7 @@ RELEVANT          0       98
 ### 6.1 Immediate Improvements
 
 1. **Address Class Imbalance**:
+
    ```bash
    # Implement balanced sampling
    python -m src.models.train_balanced \
@@ -360,6 +384,7 @@ Website       Files      JSONL       CSV      PKL      JSON/PNG
 ### 7.3 Dependencies and Requirements
 
 **Core Libraries:**
+
 - `pandas`, `numpy`, `scikit-learn`: Data processing and ML
 - `beautifulsoup4`, `requests`: Web scraping
 - `transformers`, `sentence-transformers`: NLP models
@@ -368,6 +393,7 @@ Website       Files      JSONL       CSV      PKL      JSON/PNG
 - `matplotlib`, `seaborn`: Visualization
 
 **Environment Setup:**
+
 ```bash
 conda create -n parliament-classifier python=3.11
 conda activate parliament-classifier
@@ -402,33 +428,39 @@ parliament-classifier/
 ### 8.2 Reproducibility Steps
 
 1. **Environment Setup**:
+
    ```bash
    conda activate parliament-classifier
    ```
 
 2. **Data Collection**:
+
    ```bash
    python -m src.scrape.fetch_sittings --num-sittings 10
    python -m src.scrape.fetch_order_papers --num-papers 10
    ```
 
 3. **Data Processing**:
+
    ```bash
    python -m src.parse.segment --in data/raw/ --order-papers-dir data/interim/ --out data/processed/
    ```
 
 4. **Annotation**:
+
    ```bash
    python -m src.label.auto_annotate --in data/processed/utterances_full.jsonl --out data/processed/auto_annotated_large.csv
    ```
 
 5. **Model Training**:
+
    ```bash
    python -m src.models.train_baselines --in data/processed/ --out experiments/runs/baseline/
    python -m src.models.train_sentence_transformer --in data/processed/ --out experiments/runs/sentence_transformer/
    ```
 
 6. **Evaluation**:
+
    ```bash
    python -m src.eval.report --run-dir experiments/runs/ --out reports/figs/
    ```
@@ -471,6 +503,7 @@ This project successfully demonstrates a complete end-to-end pipeline for parlia
 ### 9.4 Impact and Applications
 
 This work provides a foundation for:
+
 - **Parliamentary Analytics**: Automated analysis of debate relevance
 - **Policy Research**: Identification of motion-related discussions
 - **Transparency Tools**: Public access to parliamentary discourse analysis
@@ -536,12 +569,14 @@ reports/figs/                     # Evaluation visualizations
 ### Appendix C: Performance Metrics Details
 
 **Detailed Classification Reports:**
+
 - All models show identical performance due to class imbalance
 - Macro F1 = 49.5% (average of 0% and 99% F1-scores)
 - Weighted F1 = 97.0% (dominated by majority class)
 - Precision/Recall trade-offs favor majority class
 
 **Confusion Matrix Interpretation:**
+
 - True Negatives: 0 (no correct NOT_RELEVANT predictions)
 - False Positives: 2 (NOT_RELEVANT misclassified as RELEVANT)
 - False Negatives: 0 (no RELEVANT misclassified as NOT_RELEVANT)
@@ -551,4 +586,4 @@ reports/figs/                     # Evaluation visualizations
 
 *Report generated on: $(date)*
 *Project Repository: parliament-classifier*
-*Contact: [Your Contact Information]*
+
