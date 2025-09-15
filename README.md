@@ -243,7 +243,7 @@ Run the web-based demo to interactively test the classification system:
 python run_demo.py
 ```
 
-The demo will be available at: **http://localhost:5000**
+The demo will be available at: **http://localhost:8080**
 
 ### Demo Features:
 - **Interactive Classification**: Select motions and utterances to see real-time classification

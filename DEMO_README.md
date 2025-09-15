@@ -11,7 +11,7 @@ This is an interactive web application that demonstrates the parliamentary debat
 python run_demo.py
 
 # Visit in browser
-open http://localhost:5000
+open http://localhost:8080
 ```
 
 ## ✨ Features
@@ -155,7 +155,7 @@ pip install flask pandas scikit-learn joblib sentence-transformers
    python run_demo.py
    ```
 
-2. **Open Browser**: Navigate to `http://localhost:5000`
+2. **Open Browser**: Navigate to `http://localhost:8080`
 
 3. **Select Motion**: Choose a parliamentary motion from dropdown
 
@@ -170,7 +170,7 @@ pip install flask pandas scikit-learn joblib sentence-transformers
 ## 🐛 Troubleshooting
 
 ### Common Issues:
-- **Port 5000 in use**: Change port in `app.py`
+- **Port 8080 in use**: Change port in `app.py`
 - **Models not found**: Run model training first
 - **Data files missing**: Execute data preparation pipeline
 - **Import errors**: Install missing dependencies
