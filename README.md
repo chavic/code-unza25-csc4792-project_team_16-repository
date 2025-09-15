@@ -234,6 +234,30 @@ Our repo includes raw & pre-processed data and a reproducible notebook showing e
 
 ## 13) HOWTO: run the pipeline locally
 
+## Interactive Demo Application
+
+Run the web-based demo to interactively test the classification system:
+
+```bash
+# Start the demo application
+python run_demo.py
+```
+
+The demo will be available at: **http://localhost:5000**
+
+### Demo Features:
+- **Interactive Classification**: Select motions and utterances to see real-time classification
+- **Multiple Models**: Test different model architectures (TF-IDF, Sentence Transformers)
+- **Visual Results**: See confidence scores, predictions, and true labels
+- **Presentation Ready**: Clean, professional interface suitable for demonstrations
+
+### Demo Requirements:
+- Trained models (optional - will use mock predictions if not available)
+- Processed data files (`auto_annotated_large.csv`, `utterances_full.jsonl`)
+- Flask and other web dependencies installed
+
+---
+
 ### **🚀 Quick Start: Complete Data Scraping**
 
 ```bash
