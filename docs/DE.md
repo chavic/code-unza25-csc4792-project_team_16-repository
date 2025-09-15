@@ -273,7 +273,7 @@ def validate_inputs(motion_text: str, utterance_text: str) -> None:
     if len(motion_text) > 10000:
         warnings.warn("Motion text is very long, may affect performance")
     
-    if len(utterance_text) > 5000:
+    if len(utterance_text) > 8080:
         warnings.warn("Utterance text is very long, may be truncated")
 ```
 

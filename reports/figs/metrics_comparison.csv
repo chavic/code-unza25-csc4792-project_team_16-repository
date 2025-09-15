@@ -1,0 +1,4 @@
+Model,Accuracy,Macro F1,Relevant Recall,Relevant Precision,Features
+sentence_transformer_logistic,0.980,0.495,1.000,0.980,N/A
+sentence_transformer_rf,0.980,0.495,1.000,0.980,N/A
+sentence_transformer_svm,0.980,0.495,1.000,0.980,N/A
