@@ -1,8 +1,8 @@
 # Automated Classification of Parliamentary Utterances: A Machine Learning Approach to Motion Relevance Detection
 
 **Victor Chabunda**, **Constance Chilamo**, **Francis Kalunga**, **Jabulani Sinkala**, **Lisarett Banda**
-University of Zambia, School of Engineering  
-{francis.kalunga, victor.chabunda, chilamo.constance}@cs.unza.zm
+University of Zambia, School of Natural Sciences, Department of Computer Science  
+{francis.kalunga, victor.chabunda, chilamo.constance, jubulani.s.sinkala, lisarett.banda}@cs.unza.zm
 
 ## Abstract
 
@@ -264,5 +264,5 @@ We thank the University of Zambia for providing the computational resources and 
 
 **Technical Report** - CSC 4792 Group Project - Team 16  
 **Automated Classification of Parliamentary Utterances**  
-**University of Zambia, School of Engineering**  
+**University of Zambia, School of Natural Sciences, Department of Computer Science**  
 **2025**
