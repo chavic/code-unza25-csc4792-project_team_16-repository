@@ -1,4 +1,4 @@
-# README — CSC 4792 Group Project (Team N)
+# README — CSC 4792 Group Project (Team 16)
 
 **Topic 2.1.10 — Classify each MP’s response as *relevant* or *not relevant* to the motion**
 
